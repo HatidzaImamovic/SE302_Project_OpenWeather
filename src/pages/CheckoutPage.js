@@ -1,15 +1,18 @@
+import { CheckoutLocators } from "../locators/locators";
+
 export class CheckoutPage{
     constructor(page){
         this.page=page;
 
-        this.firstNameInput=page.locator('#first-name');
-        this.lastNameInput=page.locator('#last-name');
-        this.postalCodeInput=page.locator('#postal-code');
-        this.continueButton=page.locator('#continue');
-        this.cancelButton=page.locator('#cancel')
-        this.finishButton=page.locator('#finish');
-        this.thankYouMsg=page.locator('.complete-header');
-        this.backHomeButton=page.locator('#back-to-products');
+        this.firstNameInput=page.locator(CheckoutLocators.firstNameInput);
+        this.lastNameInput=page.locator(CheckoutLocators.lastNameInput);
+        this.postalCodeInput=page.locator(CheckoutLocators.postalCodeInput);
+        this.continueButton=page.locator(CheckoutLocators.continueButton);
+        this.cancelButton=page.locator(CheckoutLocators.cancelButton);
+        this.finishButton=page.locator(CheckoutLocators.finishButton);
+        this.thankYouMsg=page.locator(CheckoutLocators.thankYouMsg);
+        this.backHomeButton=page.locator(CheckoutLocators.backHomeButton);
+        this.errorMsg=page.locator(CheckoutLocators.errorMessage);
     }
 
     async checkOut(firstName, lastName, postalCode){
@@ -33,5 +36,9 @@ export class CheckoutPage{
 
     async displayThankYouMsg(){
         return this.thankYouMsg.textContent();
+    }
+
+    async getErrorMsg(){
+        return await this.errorMsg.textContent();
     }
 }
