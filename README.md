@@ -1,1 +1,1 @@
-# SE302_Project_OpenWeather-src-tests-functional
+# SE302_Project_Saucedemo
