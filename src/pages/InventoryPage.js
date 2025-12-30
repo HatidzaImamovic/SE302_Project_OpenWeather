@@ -1,13 +1,17 @@
+import { InventoryLocators } from "../locators/locators";
+
 export class InventoryPage{
     constructor(page){
         this.page=page;
 
-        this.inventoryItem=page.locator('.inventory_item');
-        this.cartButton=page.locator('.shopping_cart_link');
-        this.cartBadge=page.locator('.shopping_cart_badge');
-        this.menuButton=page.locator('#react-burger-menu-btn');
-        this.logoutButton=page.locator('#logout_sidebar_link');
-        this.sortDropdown=page.locator('[data-test="product_sort_container"]');
+        this.inventoryItem=page.locator(InventoryLocators.inventoryItem);
+        this.itemName=page.locator(InventoryLocators.itemName);
+        this.itemPrice=page.locator(InventoryLocators.itemPrice);
+        this.cartButton=page.locator(InventoryLocators.cartButton);
+        this.cartBadge=page.locator(InventoryLocators.cartBadge);
+        this.menuButton=page.locator(InventoryLocators.menuButton);
+        this.logoutButton=page.locator(InventoryLocators.logoutButton);
+        this.sortDropdown=page.locator(InventoryLocators.sortDropdown);
     }
 
     async visibleFullInventory(){
@@ -22,6 +26,17 @@ export class InventoryPage{
     async removeItemFromCart(itemName){
         await this.page.click(
         `//div[text()="${itemName}"]/ancestor::div[@class="inventory_item"]//button`);
+    }
+
+    async getItemNames(){
+        await this.inventoryItem.first().waitFor({state: 'visible'});
+        return await this.itemName.allTextContents();
+    }
+
+    async getItemPrices(){
+        await this.inventoryItem.first().waitFor({state: 'visible'});
+        const prices=await this.itemPrice.allTextContents();
+        return prices.map(p => parseFloat(p.replace('$', '')));
     }
 
     async openProductDetails(itemName){
@@ -43,7 +58,27 @@ export class InventoryPage{
     }
 
     async sortBy(option){
-        await this.sortDropdown.selectOption(option);
+        await this.page.waitForURL(/.*inventory.html/);
+        await this.inventoryItem.first().waitFor({ state: 'visible' });
+        await this.page.waitForSelector('.header_secondary_container', { state: 'visible', timeout: 5000 }).catch(() => {});
+
+        const dropdownSelector=await (async () => {
+            const s1='select[data-test="product_sort_container"]';
+            const s2='select.product_sort_container';
+            if (await this.page.$(s1)) return s1;
+            if (await this.page.$(s2)) return s2;
+            return null;
+        })();
+
+        if(!dropdownSelector){
+            throw new Error('Sort dropdown not found on inventory page');
+        }
+
+        await this.page.waitForSelector(dropdownSelector, {state: 'visible', timeout: 5000 });
+        await this.page.selectOption(dropdownSelector, option);
+
+        await this.inventoryItem.first().waitFor({state: 'visible' });
+        await this.page.waitForLoadState('networkidle');
     }
 
     async logout(){
